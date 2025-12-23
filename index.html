@@ -120,7 +120,7 @@
 
         const photoFiles = [
             './image1.jpg', './image2.jpg', './image3.jpg', './image4.jpg', './image5.jpg',
-            './image6.jpg', './image7.jpg', './image8.jpg', './image9.jpg', './image10.jpg'
+            './image6.jpg', './image7.jpg', './image8.jpg', './image9.jpg', './image10.jpg', './image11.jpg', './image12.jpg'
         ];
 
         const loader = new THREE.TextureLoader();
@@ -226,7 +226,7 @@
             // Màu mặc định là Vàng
             const borderMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); 
 
-            for(let i=0; i<10; i++) {
+            for(let i=0; i<photoTextures.length; i++) {
                 const tex = photoTextures[i % photoTextures.length];
                 if(tex) { tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); tex.minFilter = THREE.LinearFilter; }
                 const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
@@ -240,7 +240,7 @@
                 // Thêm độ lệch riêng cho từng ảnh để vị trí không thẳng hàng hoàn hảo
                 photoOffsets.push({
                     radialOffset: (Math.random() - 0.5) * 6,   // lệch bán kính nhẹ
-                    heightOffset: (Math.random() - 0.5) * 6,   // lệch cao độ nhẹ
+                    heightOffset: (Math.random() - 0.5) * 12,  // lệch cao độ nhẹ (nhấp nhô hơn)
                     angleOffset: (Math.random() - 0.5) * 0.4   // lệch góc nhẹ
                 });
             }
@@ -366,7 +366,8 @@
                     const angle = baseAngle + i * angleStep + jitter.angleOffset;
                     const x = Math.sin(angle) * radius;
                     const z = Math.cos(angle) * radius;
-                    const y = Math.sin(time + i + jitter.angleOffset) * 5 + jitter.heightOffset; 
+                    const stagger = (i % 2 === 0) ? 6 : -6;
+                    const y = Math.sin(time + i + jitter.angleOffset) * 9 + jitter.heightOffset + stagger; 
                     mesh.position.lerp(new THREE.Vector3(x, y, z), 0.1); mesh.lookAt(camera.position);
                     if (z > maxZ) { maxZ = z; bestIdx = i; }
                     if (z > 5) { const ds = 1.0 + (z/CONFIG.photoOrbitRadius)*0.8; mesh.scale.lerp(new THREE.Vector3(ds, ds, ds), 0.1); } else { mesh.scale.lerp(new THREE.Vector3(0.6, 0.6, 0.6), 0.1); }
