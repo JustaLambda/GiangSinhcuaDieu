@@ -135,6 +135,7 @@
         let scene, camera, renderer;
         let groupGold, groupRed, groupGift; 
         let photoMeshes = [];    
+        let photoOffsets = [];
         let titleMesh, starMesh, loveMesh;
         let state = 'TREE'; 
         let selectedIndex = 0;
@@ -235,6 +236,13 @@
                 border.position.z = -0.1; mesh.add(border);
                 mesh.visible = false; mesh.scale.set(0,0,0);
                 scene.add(mesh); photoMeshes.push(mesh);
+
+                // Thêm độ lệch riêng cho từng ảnh để vị trí không thẳng hàng hoàn hảo
+                photoOffsets.push({
+                    radialOffset: (Math.random() - 0.5) * 6,   // lệch bán kính nhẹ
+                    heightOffset: (Math.random() - 0.5) * 6,   // lệch cao độ nhẹ
+                    angleOffset: (Math.random() - 0.5) * 0.4   // lệch góc nhẹ
+                });
             }
         }
 
@@ -353,10 +361,12 @@
                     // Reset màu khung về Vàng
                     mesh.children[0].material.color.setHex(0xFFD700); 
 
-                    const angle = baseAngle + i * angleStep;
-                    const x = Math.sin(angle) * CONFIG.photoOrbitRadius;
-                    const z = Math.cos(angle) * CONFIG.photoOrbitRadius;
-                    const y = Math.sin(time + i) * 5; 
+                    const jitter = photoOffsets[i] || { radialOffset: 0, heightOffset: 0, angleOffset: 0 };
+                    const radius = CONFIG.photoOrbitRadius + jitter.radialOffset;
+                    const angle = baseAngle + i * angleStep + jitter.angleOffset;
+                    const x = Math.sin(angle) * radius;
+                    const z = Math.cos(angle) * radius;
+                    const y = Math.sin(time + i + jitter.angleOffset) * 5 + jitter.heightOffset; 
                     mesh.position.lerp(new THREE.Vector3(x, y, z), 0.1); mesh.lookAt(camera.position);
                     if (z > maxZ) { maxZ = z; bestIdx = i; }
                     if (z > 5) { const ds = 1.0 + (z/CONFIG.photoOrbitRadius)*0.8; mesh.scale.lerp(new THREE.Vector3(ds, ds, ds), 0.1); } else { mesh.scale.lerp(new THREE.Vector3(0.6, 0.6, 0.6), 0.1); }
